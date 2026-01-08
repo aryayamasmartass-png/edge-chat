@@ -9,6 +9,8 @@ const message = z.object({
   timestamp: z.number(),
   roomId: z.string(),
   token: z.string().optional(),
+  imageBase64: z.string().optional(),
+  imageType: z.string().optional(),
 })
 
 const schema = {

@@ -5,7 +5,7 @@ import { authMiddleware } from "./auth"
 import { z } from "zod"
 import { Message, realtime } from "@/lib/realtime"
 
-const ROOM_TTL_SECONDS =60 * 10
+const ROOM_TTL_SECONDS = 60 * 10
 
 const rooms = new Elysia({ prefix: "/room" })
   .post("/create", async () => {
@@ -48,7 +48,7 @@ const messages = new Elysia({ prefix: "/messages" })
   .post(
     "/",
     async ({ body, auth }) => {
-      const { sender, text } = body
+      const { id, sender, text, imageBase64, imageType } = body
       const { roomId } = auth
 
       const roomExists = await redis.exists(`meta:${roomId}`)
@@ -58,11 +58,12 @@ const messages = new Elysia({ prefix: "/messages" })
       }
 
       const message: Message = {
-        id: nanoid(),
+        id: id || nanoid(),
         sender,
         text,
         timestamp: Date.now(),
         roomId,
+        ...(imageBase64 && imageType ? { imageBase64, imageType } : {}),
       }
 
       // add message to history
@@ -79,8 +80,11 @@ const messages = new Elysia({ prefix: "/messages" })
     {
       query: z.object({ roomId: z.string() }),
       body: z.object({
+        id: z.string().optional(),
         sender: z.string().max(100),
-        text: z.string().max(1000),
+        text: z.string().max(5000),
+        imageBase64: z.string().max(3000000).optional(), // ~2MB base64
+        imageType: z.string().max(50).optional(),
       }),
     }
   )
