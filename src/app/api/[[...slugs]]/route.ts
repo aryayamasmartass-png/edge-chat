@@ -71,6 +71,7 @@ const messages = new Elysia({ prefix: "/messages" })
 
       // OPTIMIZATION: If payload is large, strip image and signal fetch.
       // Lowered limit to 10KB to prevent ANY socket stability issues with base64.
+      const payload = { ...message }
       if (payload.imageBase64 && payload.imageBase64.length > 10000) {
         delete payload.imageBase64
         // @ts-ignore - dynamic property for client coordination
